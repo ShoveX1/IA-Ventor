@@ -1,0 +1,236 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id          Int          @id @default(autoincrement())
+  phone       String       @unique
+  activeBot   Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  chatSession ChatSession?
+  cart        Cart?
+  orders      Order[]
+}
+
+model ChatSession {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  history   Json     @default("[]")
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id            Int        @id @default(autoincrement())
+  name          String
+  parentId      Int?
+  parent        Category?  @relation("SubCategories", fields: [parentId], references: [id])
+  subCategories Category[] @relation("SubCategories")
+  status        Boolean    @default(true)
+  products      Product[]
+}
+
+model Location {
+  id              Int                @id @default(autoincrement())
+  name            String
+  type            String             // ALMACEN, TIENDA, REVISION
+  inventoryItems  CurrentInventory[]
+  sourceMovements MovementHistory[]  @relation("SourceLocation")
+  destMovements   MovementHistory[]  @relation("DestLocation")
+}
+
+model Supplier {
+  id           Int          @id @default(autoincrement())
+  companyName  String
+  status       Boolean      @default(true)
+  stockEntries StockEntry[]
+}
+
+model Product {
+  id          Int              @id @default(autoincrement())
+  name        String
+  description String
+  categoryId  Int
+  category    Category         @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  variants    ProductVariant[]
+}
+
+model Attribute {
+  id     Int              @id @default(autoincrement())
+  name   String           // Talla, Color, Material
+  values AttributeValue[]
+}
+
+model AttributeValue {
+  id          Int             @id @default(autoincrement())
+  attributeId Int
+  attribute   Attribute       @relation(fields: [attributeId], references: [id])
+  value       String          // S, M, L, Negro, Blanco
+  details     VariantDetail[]
+}
+
+model ProductVariant {
+  id             Int               @id @default(autoincrement())
+  productId      Int
+  product        Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku            String            @unique
+  price          Int               // Precio en centavos (ej: 4990 = S/. 49.90)
+  variantDetails VariantDetail[]
+  batches        Batch[]
+  cartItems      CartItem[]
+  orderDetails   OrderDetail[]
+  returns        Return[]
+  movements      MovementHistory[]
+}
+
+model VariantDetail {
+  variantId        Int
+  attributeValueId Int
+  variant          ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  attributeValue   AttributeValue @relation(fields: [attributeValueId], references: [id])
+
+  @@id([variantId, attributeValueId])
+}
+
+model StockEntry {
+  id         Int               @id @default(autoincrement())
+  entryDate  DateTime          @default(now())
+  supplierId Int
+  supplier   Supplier          @relation(fields: [supplierId], references: [id])
+  status     String            // RECIBIDO, PENDIENTE
+  batches    Batch[]
+  movements  MovementHistory[]
+}
+
+model Batch {
+  id             Int                @id @default(autoincrement())
+  variantId      Int
+  variant        ProductVariant     @relation(fields: [variantId], references: [id])
+  stockEntryId   Int
+  stockEntry     StockEntry         @relation(fields: [stockEntryId], references: [id])
+  unitCost       Int                // Costo unitario en centavos
+  createdAt      DateTime           @default(now())
+  inventoryItems CurrentInventory[]
+  orderDetails   OrderDetail[]
+  returns        Return[]
+  movements      MovementHistory[]
+}
+
+model CurrentInventory {
+  batchId          Int
+  batch            Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  locationId       Int
+  location         Location @relation(fields: [locationId], references: [id])
+  physicalQuantity Int      @default(0)
+  reservedQuantity Int      @default(0)
+
+  @@id([batchId, locationId])
+}
+
+model Cart {
+  id        Int        @id @default(autoincrement())
+  userId    Int        @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  items     CartItem[]
+}
+
+model CartItem {
+  id        Int            @id @default(autoincrement())
+  cartId    Int
+  cart      Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  variantId Int
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  quantity  Int            @default(1)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([cartId, variantId])
+}
+
+model Order {
+  id                    Int               @id @default(autoincrement())
+  userId                Int
+  user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  total                 Int               // Total en centavos
+  estimatedDeliveryDate DateTime?
+  deliveryAddress       String?
+  logisticStatus        String            @default("PENDING") // PENDING, SHIPPED, DELIVERED
+  paymentMethod         String            @default("YAPE")    // YAPE, BCP_TRANSFER, CASH_ON_DELIVERY
+  paymentStatus         String            @default("PENDING") // PENDING, PAID, CANCELLED
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  details               OrderDetail[]
+  returns               Return[]
+  movements             MovementHistory[]
+}
+
+model OrderDetail {
+  id             Int            @id @default(autoincrement())
+  orderId        Int
+  order          Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variantId      Int
+  variant        ProductVariant @relation(fields: [variantId], references: [id])
+  batchId        Int
+  batch          Batch          @relation(fields: [batchId], references: [id])
+  quantityOrdered Int
+  finalSalePrice Int            // Precio final en centavos
+}
+
+model Return {
+  id           Int               @id @default(autoincrement())
+  orderId      Int
+  order        Order             @relation(fields: [orderId], references: [id])
+  variantId    Int
+  variant      ProductVariant    @relation(fields: [variantId], references: [id])
+  batchId      Int?
+  batch        Batch?            @relation(fields: [batchId], references: [id])
+  requestDate  DateTime          @default(now())
+  reason       String
+  reviewStatus String            @default("PENDING") // PENDING, APPROVED, SCRAP_MERMA
+  movements    MovementHistory[]
+}
+
+model MovementType {
+  id         Int               @id @default(autoincrement())
+  code       String            @unique // INGRESO, VENTA, DEVOLUCION, AJUSTE
+  multiplier Int               // +1, -1, 0
+  movements  MovementHistory[]
+}
+
+model MovementHistory {
+  id                    Int            @id @default(autoincrement())
+  movementDate          DateTime       @default(now())
+  variantId             Int
+  variant               ProductVariant @relation(fields: [variantId], references: [id])
+  batchId               Int?
+  batch                 Batch?         @relation(fields: [batchId], references: [id])
+  movementTypeId        Int
+  movementType          MovementType   @relation(fields: [movementTypeId], references: [id])
+  sourceLocationId      Int?
+  sourceLocation        Location?      @relation("SourceLocation", fields: [sourceLocationId], references: [id])
+  destinationLocationId Int?
+  destinationLocation   Location?      @relation("DestLocation", fields: [destinationLocationId], references: [id])
+  movedQuantity         Int
+  historicalPrice       Int            // Precio o costo en centavos
+  stockEntryId          Int?
+  stockEntry            StockEntry?    @relation(fields: [stockEntryId], references: [id])
+  orderId               Int?
+  order                 Order?         @relation(fields: [orderId], references: [id])
+  returnId              Int?
+  returnRef             Return?        @relation(fields: [returnId], references: [id])
+}
+
+model ProcessedWebhook {
+  id          Int      @id @default(autoincrement())
+  messageId   String   @unique
+  processedAt DateTime @default(now())
+}

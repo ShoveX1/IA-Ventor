@@ -1,0 +1,35 @@
+{
+  "name": "ia-ventor-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Backend para automatización de ventas en WhatsApp usando la API de Gemini 3.5 Flash",
+  "main": "dist/app.js",
+  "scripts": {
+    "dev": "tsx watch src/app.ts",
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "tsx prisma/seed.ts",
+    "mcp:client": "tsx src/mcp/client.ts"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.3.0",
+    "@google/generative-ai": "^0.15.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/client": "^7.9.1",
+    "axios": "^1.7.2",
+    "dotenv": "^16.6.1",
+    "fastify": "^5.10.0",
+    "pg": "^8.22.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.11",
+    "@types/pg": "^8.20.3",
+    "prisma": "^7.9.1",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.3"
+  }
+}

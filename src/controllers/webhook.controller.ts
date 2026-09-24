@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { config } from "../config/config.js";
 import { prisma } from "../services/db.service.js";
-import { geminiService } from "../services/gemini.service.js";
+import { deepSeekService } from "../services/deepseek.service.js";
 import { whatsAppService } from "../services/whatsapp.service.js";
 
 // Estructuras de tipos básicas para el Webhook de WhatsApp Cloud API
@@ -149,8 +149,8 @@ export class WebhookController {
       return;
     }
 
-    // Procesar con Gemini Service (Function Calling se maneja internamente de manera iterativa)
-    const aiResponse = await geminiService.sendMessage(user.id, text);
+    // Procesar con DeepSeek Service (Tool Calling se maneja internamente de manera iterativa)
+    const aiResponse = await deepSeekService.sendMessage(user.id, text);
     
     // Si el número de origen es el simulador ficticio de Meta (16315551181),
     // redirigimos la respuesta de salida a tu número verificado para que la recibas en tu celular.

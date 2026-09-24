@@ -1,68 +1,83 @@
-import { FunctionDeclaration } from "@google/generative-ai";
+import type { ChatCompletionTool } from "openai/resources/chat/completions";
 import { cartService } from "../services/cart.service.js";
 
-// 1. Declaración de las herramientas para Gemini API
-export const geminiDeclarations: FunctionDeclaration[] = [
+// 1. Declaración de las herramientas para DeepSeek API (Formato estándar OpenAI Tool Calling)
+export const deepseekTools: ChatCompletionTool[] = [
   {
-    name: "search_catalog",
-    description: "Busca productos en el catálogo de la tienda por nombre o descripción. Devuelve los productos disponibles y sus variantes (ID de variante, color, talla, precio y stock).",
-    parameters: {
-      type: "OBJECT" as any,
-      properties: {
-        query: {
-          type: "STRING" as any,
-          description: "Término de búsqueda (ej. 'polo', 'casaca', 'rojo', 'oversize').",
+    type: "function",
+    function: {
+      name: "search_catalog",
+      description: "Busca productos en el catálogo de la tienda por nombre o descripción. Devuelve los productos disponibles y sus variantes (ID de variante, color, talla, precio y stock).",
+      parameters: {
+        type: "object",
+        properties: {
+          query: {
+            type: "string",
+            description: "Término de búsqueda (ej. 'polo', 'casaca', 'rojo', 'oversize').",
+          },
         },
+        required: ["query"],
       },
-      required: ["query"],
     },
   },
   {
-    name: "add_to_cart",
-    description: "Agrega una cantidad específica de un producto (variante) al carrito del usuario utilizando su variant_id.",
-    parameters: {
-      type: "OBJECT" as any,
-      properties: {
-        variant_id: {
-          type: "INTEGER" as any,
-          description: "El ID único de la variante del producto (obtenido al buscar en el catálogo).",
+    type: "function",
+    function: {
+      name: "add_to_cart",
+      description: "Agrega una cantidad específica de un producto (variante) al carrito del usuario utilizando su variant_id.",
+      parameters: {
+        type: "object",
+        properties: {
+          variant_id: {
+            type: "integer",
+            description: "El ID único de la variante del producto (obtenido al buscar en el catálogo).",
+          },
+          quantity: {
+            type: "integer",
+            description: "La cantidad de unidades a agregar (debe ser mayor a 0).",
+          },
         },
-        quantity: {
-          type: "INTEGER" as any,
-          description: "La cantidad de unidades a agregar (debe ser mayor a 0).",
-        },
+        required: ["variant_id", "quantity"],
       },
-      required: ["variant_id", "quantity"],
     },
   },
   {
-    name: "view_cart",
-    description: "Muestra el estado actual del carrito de compras del usuario, incluyendo los items, tallas, colores, cantidades, subtotales y el total acumulado.",
-    parameters: {
-      type: "OBJECT" as any,
-      properties: {},
-    },
-  },
-  {
-    name: "checkout",
-    description: "Cierra el carrito de compras del usuario actual y crea una orden de compra pendiente de pago (PENDING). Devuelve el total final y el ID de la orden.",
-    parameters: {
-      type: "OBJECT" as any,
-      properties: {},
-    },
-  },
-  {
-    name: "handoff_to_human",
-    description: "Pausa el chatbot para que un agente humano tome el control de la conversación. Debe llamarse cuando el cliente pida hablar con un asesor/humano o cuando la IA no pueda resolver sus dudas.",
-    parameters: {
-      type: "OBJECT" as any,
-      properties: {
-        reason: {
-          type: "STRING" as any,
-          description: "La razón por la cual se transfiere la conversación a un humano.",
-        },
+    type: "function",
+    function: {
+      name: "view_cart",
+      description: "Muestra el estado actual del carrito de compras del usuario, incluyendo los items, tallas, colores, cantidades, subtotales y el total acumulado.",
+      parameters: {
+        type: "object",
+        properties: {},
       },
-      required: ["reason"],
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "checkout",
+      description: "Cierra el carrito de compras del usuario actual y crea una orden de compra pendiente de pago (PENDING). Devuelve el total final y el ID de la orden.",
+      parameters: {
+        type: "object",
+        properties: {},
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "handoff_to_human",
+      description: "Pausa el chatbot para que un agente humano tome el control de la conversación. Debe llamarse cuando el cliente pida hablar con un asesor/humano o cuando la IA no pueda resolver sus dudas.",
+      parameters: {
+        type: "object",
+        properties: {
+          reason: {
+            type: "string",
+            description: "La razón por la cual se transfiere la conversación a un humano.",
+          },
+        },
+        required: ["reason"],
+      },
     },
   },
 ];

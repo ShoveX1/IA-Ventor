@@ -1,6 +1,6 @@
 # 🤖 Sistema Vendedor IA Multimodal (Perú Edition)
 
-Este proyecto consiste en un backend transaccional y sistema de ventas automatizado para **WhatsApp** impulsado por la API de **Google Gemini** con arquitectura **Backend-First (Headless)**. El sistema actúa como una vendedora virtual llamada **"María"**, capaz de consultar inventario real, gestionar carritos de compras y procesar pedidos con pagos vía **Yape/BCP**.
+Este proyecto consiste en un backend transaccional y sistema de ventas automatizado para **WhatsApp** impulsado por la API de **DeepSeek** (`deepseek-chat`) con arquitectura **Backend-First (Headless)**. El sistema actúa como una vendedora virtual llamada **"María"**, capaz de consultar inventario real, gestionar carritos de compras y procesar pedidos con pagos vía **Yape/BCP**.
 
 > [!IMPORTANT]
 > **Entorno de Desarrollo:** Google Project IDE.
@@ -29,7 +29,7 @@ Para conectar tu frontend (Next.js, React, Mobile), Postman o herramientas de IA
 - **Backend:** Node.js con **Fastify** (TypeScript) en arquitectura REST pura.
 - **Base de Datos:** **PostgreSQL** (alojado localmente en la máquina del desarrollador).
 - **ORM:** **Prisma** (Fuente de verdad del esquema con soporte para Lotes, EAV y Ledger).
-- **IA:** **Google Generative AI** (Modelo `gemini-3.5-flash` / `gemini-3.6-flash` con Function Calling).
+- **IA:** **DeepSeek API** (Modelo `deepseek-chat` / DeepSeek-V3 con Tool Calling estándar OpenAI).
 - **Protocolo de IA (MCP):** **Model Context Protocol SDK** (`@modelcontextprotocol/sdk`) con transporte SSE.
 - **Canal:** WhatsApp Cloud API (Meta).
 - **Túnel de Pruebas:** ngrok para exponer el puerto local `3000`.
@@ -131,7 +131,8 @@ La vendedora tiene una personalidad amigable y peruana. Su flujo de trabajo es e
    WHATSAPP_TOKEN="tu_token_de_meta_developers"
    PHONE_NUMBER_ID="1255667080958332"
    WHATSAPP_VERIFY_TOKEN="ventor_secreto_123"
-   GEMINI_API_KEY="tu_gemini_api_key"
+   DEEPSEEK_API_KEY="tu_deepseek_api_key"
+   DEEPSEEK_MODEL="deepseek-chat"
    PAYMENT_YAPE_NUMBER="928352054"
    PORT=3000
    CORS_ORIGIN="*"

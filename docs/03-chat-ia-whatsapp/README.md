@@ -7,7 +7,7 @@ Este módulo describe cómo funciona el motor de inteligencia artificial para la
 ## 🤖 La Vendedora Virtual: María
 
 - **Personalidad:** Cordial, amigable, carismática, vendedora de moda peruana ("casero", "buenazo", "chévere").
-- **Modelo:** Google Gemini (`gemini-3.5-flash` / `gemini-3.6-flash`).
+- **Modelo:** DeepSeek API (`deepseek-chat` / DeepSeek-V3 con Tool Calling estándar OpenAI).
 - **Capacidades de Function Calling:**
   1. `search_catalog(query)`: Consulta productos y variantes en tiempo real.
   2. `add_to_cart(variant_id, quantity)`: Añade prendas al carrito temporal.
